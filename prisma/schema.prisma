@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model FileRecord {
+  id           String   @id @default(cuid())
+  originalName String
+  storedPath   String
+  mimeType     String
+  size         BigInt
+  createdAt    DateTime @default(now())
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  body      String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+  pinned    Boolean   @default(false)
+  pinnedAt  DateTime?
+}
