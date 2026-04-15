@@ -160,7 +160,7 @@ export function FilesColumn({
                 {!files.length && !filesErr ? (
                     <p className="empty">No files yet.</p>
                 ) : (
-                    <ul className="file-list" style={{ marginTop: '1rem' }}>
+                    <ul className="file-list scrollbar-thin scrollbar-light" style={{ marginTop: '1rem' }}>
                         {files.map((f) => (
                             <li key={f.id}>
                                 <div className="file-meta">

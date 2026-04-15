@@ -18,7 +18,7 @@ import { FileToast } from '@/components/home/FileToast';
 import { FilesColumn } from '@/components/home/FilesColumn';
 import { SocketBanner } from '@/components/home/SocketBanner';
 import type { ChatMessage, DeleteConfirmState, FileRow, UploadJob } from '@/components/home/types';
-import { safeDisplayFileName, sortChatMessages } from '@/components/home/utils';
+import { randomUUID, safeDisplayFileName, sortChatMessages } from '@/components/home/utils';
 import { HomePageHeader } from './HomePageHeader';
 
 export default function HomePage() {
@@ -261,7 +261,7 @@ export default function HomePage() {
             }
 
             const jobs: UploadJob[] = files.map((f) => ({
-                id: crypto.randomUUID(),
+                id: randomUUID(),
                 name: f.name,
                 size: f.size,
                 status: 'pending',

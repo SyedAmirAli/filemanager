@@ -571,9 +571,14 @@ section {
 }
 
 .file-list {
-    list-style: none;
+    flex: 1;
     margin: 0;
     padding: 0;
+    list-style: none;
+    margin-top: 1rem;
+    overflow-y: auto;
+    min-height: 200px;
+    max-height: min(52vh, 407px);
 }
 
 .file-list li {
