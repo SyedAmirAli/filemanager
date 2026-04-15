@@ -1,16 +1,25 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
-const PRODUCTION_SERVER_URL = 'https://filemanager.syedamirali.me';
+const clientRoot = fileURLToPath(new URL('.', import.meta.url));
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
+    resolve: {
+        alias: {
+            '@': path.resolve(clientRoot, 'src'),
+        },
+    },
     plugins: [
+        tailwindcss(),
         react(),
         {
             name: 'html-inject-server-url',
             transformIndexHtml(html) {
-                const url = mode === 'production' ? PRODUCTION_SERVER_URL : '';
-                return html.replace(/__SERVER_URL__/g, JSON.stringify(url));
+                /* Empty: same origin as the page (`/api`, Socket.IO on current host). */
+                return html.replace(/__SERVER_URL__/g, JSON.stringify(''));
             },
         },
     ],

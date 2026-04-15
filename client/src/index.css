@@ -1,3 +1,8 @@
+@import 'tailwindcss';
+
+/* App styles below override Tailwind Preflight where needed (headings, buttons, links, etc.). */
+@source './**/*.{js,ts,jsx,tsx}';
+
 :root {
     color-scheme: light dark;
     --bg: #f4f4f5;
@@ -653,7 +658,7 @@ section {
     pointer-events: none;
 }
 
-button {
+.btn {
     font: inherit;
     cursor: pointer;
     border-radius: 6px;
@@ -664,23 +669,23 @@ button {
     font-size: 0.85rem;
 }
 
-button.primary {
+.btn.primary {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
 }
 
-button.primary:hover {
+.btn.primary:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
 }
 
-button.danger {
+.btn.danger {
     color: var(--danger);
     border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
 }
 
-button:disabled {
+.btn:disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }
@@ -752,7 +757,7 @@ button:disabled {
     color: var(--muted);
 }
 
-button.ghost {
+.btn.ghost {
     background: transparent;
     border: none;
     color: var(--muted);
