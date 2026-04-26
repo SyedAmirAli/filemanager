@@ -2,13 +2,17 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import type { DragEvent, FormEvent } from 'react';
 import Fuse from 'fuse.js';
 import { io, type Socket } from 'socket.io-client';
-import { getApiBase, getSocketOrigin } from '@/apiConfig';
+import { getSocketOrigin } from '@/apiConfig';
 import { canPreviewInBrowser } from '@/previewableFile';
+import { getActiveSecurityPin } from '@/securityPin';
 import {
     bulkDeleteMessagesApi,
+    deleteFileApi,
     deleteMessageApi,
+    downloadFileApi,
     fetchFiles,
     fetchMessages,
+    openFilePreviewApi,
     patchMessageApi,
     uploadFileWithProgress,
 } from '@/components/home/api';
@@ -182,6 +186,7 @@ export default function HomePage() {
         const socket = io(getSocketOrigin(), {
             path: '/socket.io',
             transports: ['websocket', 'polling'],
+            auth: { pin: getActiveSecurityPin() },
         });
         socketRef.current = socket;
 
@@ -314,7 +319,15 @@ export default function HomePage() {
             setFileToast('This file type cannot be previewed in the browser.');
             return;
         }
-        window.open(`${getApiBase()}/files/${encodeURIComponent(f.id)}/preview`, '_blank', 'noopener,noreferrer');
+        void openFilePreviewApi(f.id).catch(() => {
+            setFileToast('Preview failed. Please try again.');
+        });
+    };
+
+    const downloadFile = (f: FileRow) => {
+        void downloadFileApi(f.id, f.originalName).catch(() => {
+            setFileToast('Download failed. Please try again.');
+        });
     };
 
     const executeDeleteConfirm = async () => {
@@ -323,7 +336,7 @@ export default function HomePage() {
         setDeleteConfirm(null);
         try {
             if (pending.type === 'file') {
-                await fetch(`${getApiBase()}/files/${pending.id}`, { method: 'DELETE' });
+                await deleteFileApi(pending.id);
                 reloadFiles();
             } else if (pending.type === 'message') {
                 await deleteMessageApi(pending.id);
@@ -522,6 +535,7 @@ export default function HomePage() {
                     setRawFileName={setRawFileName}
                     setRawFileContent={setRawFileContent}
                     openFilePreview={openFilePreview}
+                    downloadFile={downloadFile}
                     setDeleteConfirm={setDeleteConfirm}
                 />
 

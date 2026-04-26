@@ -1,6 +1,7 @@
 import { WebSocketGateway, WebSocketServer, SubscribeMessage, MessageBody, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from '../chat/chat.service';
+import { isSecurityPinValid } from '../security/security-pin';
 
 export type MessagePayload = {
     id: string;
@@ -20,6 +21,13 @@ export class RealtimeGateway {
 
     constructor(private readonly chat: ChatService) {}
 
+    handleConnection(client: Socket) {
+        const pin = typeof client.handshake.auth?.pin === 'string' ? client.handshake.auth.pin : '';
+        if (!isSecurityPinValid(pin)) {
+            client.disconnect(true);
+        }
+    }
+
     emitFilesChanged() {
         this.server.emit('filesChanged', { at: new Date().toISOString() });
     }
@@ -38,6 +46,11 @@ export class RealtimeGateway {
 
     @SubscribeMessage('sendMessage')
     async handleMessage(@MessageBody() payload: { text?: string }, @ConnectedSocket() client: Socket) {
+        const pin = typeof client.handshake.auth?.pin === 'string' ? client.handshake.auth.pin : '';
+        if (!isSecurityPinValid(pin)) {
+            client.emit('messageError', { ok: false, reason: 'unauthorized' });
+            return { ok: false };
+        }
         const text = typeof payload?.text === 'string' ? payload.text : '';
         try {
             const msg = await this.chat.createMessage(text);

@@ -1,6 +1,5 @@
 import { Download, Eye, Trash2 } from 'lucide-react';
 import type { DragEvent, FormEvent, RefObject } from 'react';
-import { getApiBase } from '@/apiConfig';
 import type { DeleteConfirmState, FileRow, UploadJob } from './types';
 import { formatBytes, formatSize, formatTime } from './utils';
 import { RawFileModal } from './RawFileModal';
@@ -25,6 +24,7 @@ type Props = {
     setRawFileName: (v: string) => void;
     setRawFileContent: (v: string) => void;
     openFilePreview: (f: FileRow) => void;
+    downloadFile: (f: FileRow) => void;
     setDeleteConfirm: (v: DeleteConfirmState) => void;
 };
 
@@ -48,6 +48,7 @@ export function FilesColumn({
     setRawFileName,
     setRawFileContent,
     openFilePreview,
+    downloadFile,
     setDeleteConfirm,
 }: Props) {
     return (
@@ -179,15 +180,15 @@ export function FilesColumn({
                                     >
                                         <Eye size={18} strokeWidth={2} aria-hidden />
                                     </button>
-                                    <a
+                                    <button
+                                        type="button"
                                         className="icon-btn"
-                                        href={`${getApiBase()}/files/${f.id}/download`}
-                                        download
                                         aria-label="Download"
                                         title="Download"
+                                        onClick={() => downloadFile(f)}
                                     >
                                         <Download size={18} strokeWidth={2} aria-hidden />
-                                    </a>
+                                    </button>
                                     <button
                                         type="button"
                                         className="icon-btn danger delete"
