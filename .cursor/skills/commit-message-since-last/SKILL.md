@@ -1,32 +1,69 @@
 ---
-name: commit-message-since-last
+name: commit
 description: >-
-    Drafts a copy-paste conventional commit message from uncommitted git changes
-    since the last commit. Use when the user asks for a commit message, a summary
-    for committing, or wants a message derived from git diff, staged changes, or
-    working tree changes.
+    Drafts a git commit message from uncommitted changes. Triggers when user 
+    asks for a commit message or uses /commit. Automatically inspects git diff 
+    and status without asking permission.
 ---
 
-# Commit message (since last commit)
+# Commit
 
-## Workflow
+**Skill name:** `commit` â€” generates **git commit messages** from uncommitted changes.
 
-1. **Inspect uncommitted changes since the last commit**
-    - Run `git status`.
-    - Run `git diff` for unstaged changes.
-    - If there are staged files, run `git diff --staged` as well.
-    - If the user cares only about what will be committed next, prefer **staged** diff (and note that in the summary if relevant).
+## When to apply
 
-2. **Write the message**
-    - Use a **short** conventional-commit style **title** (e.g. `feat(scope): …`, `fix: …`).
-    - Add **a few bullet lines** of detail: what changed and why.
-    - Match this repository’s style: **complete sentences**, **no filler**, plain and precise.
+- User asks for a commit message, types `/commit`, or wants to commit their work.
+- User mentions "git commit" or "what should I commit with".
 
-3. **Deliver to the user**
-    - Put the **final message only** in a **single fenced code block** so they can copy in one click.
-    - Use a **plain text** fence: triple backticks with **no** language tag, or the tag `text`.
-    - Do **not** wrap the suggested message in a language-tagged block (e.g. avoid ` ```markdown ` ) unless the message itself must show markdown as literal content.
+## Steps
 
-## Do not
+1. **Silently inspect changes** (no narration, no asking permission):
 
-- Run `git commit` or commit automatically unless the user **explicitly** asks to commit.
+```bash
+    git status
+    git diff
+    git diff --staged
+```
+
+2. **Analyze** what changed â€” features added, bugs fixed, refactoring done.
+
+3. **Generate** a Conventional Commitsâ€“style message:
+    - **Subject line**: `type(scope): short summary` (50-72 chars, describe the overall change)
+    - **Body**: 3-5 concise bullet points explaining specific changes
+    - Each bullet should be one clear sentence
+    - Use present tense, imperative mood ("Add feature" not "Added feature")
+    - Be specific but brief â€” focus on WHAT changed, not HOW
+
+4. **Output format**:
+    - Put the final commit message in a single fenced code block (```text)
+    - NO shell commands in the block
+    - NO preamble before the code block
+    - User should be able to copy-paste directly
+
+## Example output
+
+```text
+feat(docs): improve PDF export UX and homepage actions
+
+- Add homepage hero CTAs for Getting Started plus English/French PDF downloads.
+- Integrate PDF export tooling and scripts with language-specific config files.
+- Add PDF export button in the VitePress navbar and print-focused style adjustments.
+- Improve print output by handling video links and footer/header rendering.
+- Set PDF URL origin to https://docs.admin.acusolo.net to replace localhost links.
+```
+
+## Message style guidelines
+
+- **Subject**: summarize the main theme, not every single file
+- **Bullets**: each bullet = one logical change or feature
+- **Length**: 3-5 bullets preferred (can be 2-6 depending on scope)
+- **Tone**: professional, factual, no filler words
+- **Format**: sentence case with periods at the end, not include serial like `1. - Add Home ...` instead `- Add Home`
+
+## Critical rules
+
+- NEVER ask "Should I inspect the changes?" â€” just do it
+- NEVER put git commands in the final code block
+- NEVER explain what you're about to do â€” just run the commands and generate the message
+- NEVER output a one-line commit â€” always include bulleted details
+- The message should make sense to someone reading the git log 6 months later

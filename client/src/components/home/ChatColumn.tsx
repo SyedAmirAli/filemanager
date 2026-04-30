@@ -1,6 +1,14 @@
-import type { Dispatch, FormEvent, MutableRefObject, RefObject, SetStateAction } from 'react';
+import {
+    useLayoutEffect,
+    useRef,
+    type Dispatch,
+    type FormEvent,
+    type MutableRefObject,
+    type RefObject,
+    type SetStateAction,
+} from 'react';
 import type { ChatMessage, DeleteConfirmState } from './types';
-import { formatTime } from './utils';
+import { ChatMessageItem } from './ChatMessageItem';
 import { SendIcon } from 'lucide-react';
 
 type Props = {
@@ -88,6 +96,20 @@ export function ChatColumn({
     chatMenuPos,
     setDeleteConfirm,
 }: Props) {
+    const chatInputRef = useRef<HTMLTextAreaElement | null>(null);
+
+    useLayoutEffect(() => {
+        const textarea = chatInputRef.current;
+
+        if (!textarea) {
+            return;
+        }
+
+        textarea.style.height = '40px';
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 280)}px`;
+        textarea.style.overflowY = textarea.scrollHeight > 280 ? 'auto' : 'hidden';
+    }, [chatInput]);
+
     return (
         <section className="layout-section layout-section--chat">
             <h2>Chat</h2>
@@ -162,153 +184,43 @@ export function ChatColumn({
                     ) : (
                         <>
                             {visibleMessages.map((m) => (
-                                <article
+                                <ChatMessageItem
                                     key={m.id}
-                                    className={`chat-msg${selectionMode ? ' chat-msg--select-mode' : ''}${newIds.has(m.id) ? ' chat-msg--new' : ''}${m.pinned ? ' chat-msg--pinned' : ''}`}
-                                >
-                                    {selectionMode && (
-                                        <label className="chat-msg-select">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedIds.includes(m.id)}
-                                                onChange={() => toggleSelected(m.id)}
-                                                aria-label={`Select message ${m.id.slice(0, 8)}`}
-                                            />
-                                        </label>
-                                    )}
-                                    <div className="chat-msg-main">
-                                        <div className="chat-msg-head">
-                                            <time>{formatTime(m.createdAt)}</time>
-                                            {m.editedAt && <span className="msg-tag msg-tag--edited">edited</span>}
-                                            {m.pinned && <span className="msg-tag msg-tag--pinned">pinned</span>}
-                                        </div>
-                                        {editingId === m.id ? (
-                                            <div className="chat-msg-edit">
-                                                <textarea
-                                                    value={editDraft}
-                                                    onChange={(e) => setEditDraft(e.target.value)}
-                                                    rows={3}
-                                                    className="chat-msg-textarea"
-                                                />
-                                                <div className="chat-msg-edit-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="primary"
-                                                        onClick={() => void saveEdit()}
-                                                    >
-                                                        Save
-                                                    </button>
-                                                    <button type="button" onClick={cancelEdit}>
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p className="chat-msg-text">{m.body}</p>
-                                        )}
-                                    </div>
-                                    <div className="chat-msg-menu-wrap" data-chat-menu-root>
-                                        <button
-                                            type="button"
-                                            className="chat-msg-menu-btn"
-                                            aria-expanded={menuOpenId === m.id}
-                                            aria-haspopup="menu"
-                                            aria-label="Message actions"
-                                            ref={(el) => {
-                                                if (el) chatMenuBtnRefs.current.set(m.id, el);
-                                                else chatMenuBtnRefs.current.delete(m.id);
-                                            }}
-                                            onClick={(e) => {
-                                                if (menuOpenId === m.id) {
-                                                    setMenuOpenId(null);
-                                                    setChatMenuPos(null);
-                                                } else {
-                                                    const r = e.currentTarget.getBoundingClientRect();
-                                                    const gap = 4;
-                                                    setMenuOpenId(m.id);
-                                                    setChatMenuPos({
-                                                        top: r.bottom + gap,
-                                                        right: window.innerWidth - r.right,
-                                                    });
-                                                }
-                                            }}
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden>
-                                                <circle cx="12" cy="5" r="2" fill="currentColor" />
-                                                <circle cx="12" cy="12" r="2" fill="currentColor" />
-                                                <circle cx="12" cy="19" r="2" fill="currentColor" />
-                                            </svg>
-                                        </button>
-                                        {menuOpenId === m.id && chatMenuPos && (
-                                            <ul
-                                                ref={chatMenuPopoverRef}
-                                                className="chat-msg-menu chat-msg-menu--floating"
-                                                role="menu"
-                                                style={{
-                                                    top: chatMenuPos.top,
-                                                    right: chatMenuPos.right,
-                                                }}
-                                            >
-                                                <li role="none">
-                                                    <button type="button" role="menuitem" onClick={() => startEdit(m)}>
-                                                        Edit
-                                                    </button>
-                                                </li>
-                                                <li role="none">
-                                                    <button
-                                                        type="button"
-                                                        role="menuitem"
-                                                        onClick={() => void togglePinMsg(m)}
-                                                    >
-                                                        {m.pinned ? 'Unpin' : 'Pin'}
-                                                    </button>
-                                                </li>
-                                                <li role="none">
-                                                    <button
-                                                        type="button"
-                                                        role="menuitem"
-                                                        onClick={() => enterSelectionForMessage(m)}
-                                                    >
-                                                        Select message
-                                                    </button>
-                                                </li>
-                                                <li role="none">
-                                                    <button
-                                                        type="button"
-                                                        role="menuitem"
-                                                        onClick={() => void copyPlainText(m)}
-                                                    >
-                                                        Copy plain text
-                                                    </button>
-                                                </li>
-                                                <li role="none">
-                                                    <button
-                                                        type="button"
-                                                        role="menuitem"
-                                                        className="menu-danger"
-                                                        onClick={() => {
-                                                            setMenuOpenId(null);
-                                                            setDeleteConfirm({ type: 'message', id: m.id });
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        )}
-                                    </div>
-                                </article>
+                                    message={m}
+                                    selectionMode={selectionMode}
+                                    selected={selectedIds.includes(m.id)}
+                                    isNew={newIds.has(m.id)}
+                                    editing={editingId === m.id}
+                                    editDraft={editDraft}
+                                    setEditDraft={setEditDraft}
+                                    menuOpen={menuOpenId === m.id}
+                                    setMenuOpenId={setMenuOpenId}
+                                    chatMenuPos={chatMenuPos}
+                                    setChatMenuPos={setChatMenuPos}
+                                    chatMenuPopoverRef={chatMenuPopoverRef}
+                                    chatMenuBtnRefs={chatMenuBtnRefs}
+                                    toggleSelected={toggleSelected}
+                                    startEdit={startEdit}
+                                    cancelEdit={cancelEdit}
+                                    saveEdit={saveEdit}
+                                    copyPlainText={copyPlainText}
+                                    togglePinMsg={togglePinMsg}
+                                    enterSelectionForMessage={enterSelectionForMessage}
+                                    setDeleteConfirm={setDeleteConfirm}
+                                />
                             ))}
                             <div ref={chatBottomSentinelRef} className="chat-log-anchor" aria-hidden />
                         </>
                     )}
                 </div>
                 <form className="chat-form" onSubmit={sendChat}>
-                    <input
+                    <textarea
+                        ref={chatInputRef}
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         placeholder="Write a message…"
                         autoComplete="off"
+                        rows={1}
                     />
                     <button
                         type="submit"
