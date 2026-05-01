@@ -1,19 +1,16 @@
-import type { DeleteConfirmState } from './types';
+import { useHomeContext } from './HomeContext';
 
-type Props = {
-    deleteConfirm: NonNullable<DeleteConfirmState>;
-    selectedCount: number;
-    onDismiss: () => void;
-    onConfirm: () => void;
-};
+export function DeleteConfirmModal() {
+    const { deleteConfirm, selectedCount, setDeleteConfirm, executeDeleteConfirm } = useHomeContext();
 
-export function DeleteConfirmModal({ deleteConfirm, selectedCount, onDismiss, onConfirm }: Props) {
+    if (!deleteConfirm) return null;
+
     return (
         <div
             className="modal-backdrop"
             role="presentation"
             onMouseDown={(e) => {
-                if (e.target === e.currentTarget) onDismiss();
+                if (e.target === e.currentTarget) setDeleteConfirm(null);
             }}
         >
             <div
@@ -46,10 +43,10 @@ export function DeleteConfirmModal({ deleteConfirm, selectedCount, onDismiss, on
                     )}
                 </p>
                 <div className="modal-dialog-actions">
-                    <button type="button" onClick={onDismiss}>
+                    <button type="button" onClick={() => setDeleteConfirm(null)}>
                         Cancel
                     </button>
-                    <button type="button" className="danger" onClick={() => void onConfirm()}>
+                    <button type="button" className="danger" onClick={() => void executeDeleteConfirm()}>
                         Delete
                     </button>
                 </div>

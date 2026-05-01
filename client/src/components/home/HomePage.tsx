@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent, FormEvent } from 'react';
 import Fuse from 'fuse.js';
 import { io, type Socket } from 'socket.io-client';
@@ -20,6 +20,7 @@ import { ChatColumn } from '@/components/home/ChatColumn';
 import { DeleteConfirmModal } from '@/components/home/DeleteConfirmModal';
 import { FileToast } from '@/components/home/FileToast';
 import { FilesColumn } from '@/components/home/FilesColumn';
+import { HomeProvider } from '@/components/home/HomeContext';
 import { SocketBanner } from '@/components/home/SocketBanner';
 import type { ChatMessage, DeleteConfirmState, FileRow, UploadJob } from '@/components/home/types';
 import { randomUUID, safeDisplayFileName, sortChatMessages } from '@/components/home/utils';
@@ -508,91 +509,87 @@ export default function HomePage() {
         setMenuOpenId(null);
     };
 
+    const homeContext = {
+        files,
+        filesErr,
+        uploadBusy,
+        drag,
+        setDrag,
+        fileInputRef,
+        runUploadQueue,
+        onDrop,
+        uploadJobs,
+        rawFileModalOpen,
+        setRawFileModalOpen,
+        rawFileName,
+        rawFileContent,
+        rawFileNameInputRef,
+        closeRawFileModal,
+        submitRawFile,
+        setRawFileName,
+        setRawFileContent,
+        openFilePreview,
+        downloadFile,
+        deleteConfirm,
+        selectedCount: selectedIds.length,
+        setDeleteConfirm,
+        executeDeleteConfirm,
+        hasMore,
+        loadingMore,
+        loadMore,
+        messages,
+        visibleMessages,
+        chatSearch,
+        setChatSearch,
+        selectionMode,
+        selectedIds,
+        visibleIds,
+        allVisibleSelected,
+        someVisibleSelected,
+        setSelectedIds,
+        selectAllVisible,
+        clearSelection,
+        exitSelectionMode,
+        chatInput,
+        setChatInput,
+        sendChat,
+        socketConnected,
+        newIds,
+        editingId,
+        editDraft,
+        setEditDraft,
+        menuOpenId,
+        setMenuOpenId,
+        chatMenuPos,
+        setChatMenuPos,
+        chatLogRef,
+        chatBottomSentinelRef,
+        chatMenuPopoverRef,
+        chatMenuBtnRefs,
+        toggleSelected,
+        startEdit,
+        cancelEdit,
+        saveEdit,
+        copyPlainText,
+        togglePinMsg,
+        enterSelectionForMessage,
+    };
+
     return (
-        <Fragment>
+        <HomeProvider value={homeContext}>
             <HomePageHeader onServerUrlChanged={applyServerUrlChange} />
 
             <SocketBanner socketStatus={socketStatus} socketErr={socketErr} />
 
             <div className="layout">
-                <FilesColumn
-                    files={files}
-                    filesErr={filesErr}
-                    uploadBusy={uploadBusy}
-                    drag={drag}
-                    setDrag={setDrag}
-                    fileInputRef={fileInputRef}
-                    runUploadQueue={runUploadQueue}
-                    onDrop={onDrop}
-                    uploadJobs={uploadJobs}
-                    rawFileModalOpen={rawFileModalOpen}
-                    setRawFileModalOpen={setRawFileModalOpen}
-                    rawFileName={rawFileName}
-                    rawFileContent={rawFileContent}
-                    rawFileNameInputRef={rawFileNameInputRef}
-                    closeRawFileModal={closeRawFileModal}
-                    submitRawFile={submitRawFile}
-                    setRawFileName={setRawFileName}
-                    setRawFileContent={setRawFileContent}
-                    openFilePreview={openFilePreview}
-                    downloadFile={downloadFile}
-                    setDeleteConfirm={setDeleteConfirm}
-                />
+                <FilesColumn />
 
-                <ChatColumn
-                    hasMore={hasMore}
-                    loadingMore={loadingMore}
-                    loadMore={loadMore}
-                    messages={messages}
-                    visibleMessages={visibleMessages}
-                    chatSearch={chatSearch}
-                    setChatSearch={setChatSearch}
-                    selectionMode={selectionMode}
-                    selectedIds={selectedIds}
-                    visibleIds={visibleIds}
-                    allVisibleSelected={allVisibleSelected}
-                    someVisibleSelected={someVisibleSelected}
-                    setSelectedIds={setSelectedIds}
-                    selectAllVisible={selectAllVisible}
-                    clearSelection={clearSelection}
-                    exitSelectionMode={exitSelectionMode}
-                    chatInput={chatInput}
-                    setChatInput={setChatInput}
-                    sendChat={sendChat}
-                    socketConnected={socketConnected}
-                    newIds={newIds}
-                    editingId={editingId}
-                    editDraft={editDraft}
-                    setEditDraft={setEditDraft}
-                    menuOpenId={menuOpenId}
-                    setMenuOpenId={setMenuOpenId}
-                    chatMenuPos={chatMenuPos}
-                    setChatMenuPos={setChatMenuPos}
-                    chatLogRef={chatLogRef}
-                    chatBottomSentinelRef={chatBottomSentinelRef}
-                    chatMenuPopoverRef={chatMenuPopoverRef}
-                    chatMenuBtnRefs={chatMenuBtnRefs}
-                    toggleSelected={toggleSelected}
-                    startEdit={startEdit}
-                    cancelEdit={cancelEdit}
-                    saveEdit={saveEdit}
-                    copyPlainText={copyPlainText}
-                    togglePinMsg={togglePinMsg}
-                    enterSelectionForMessage={enterSelectionForMessage}
-                    setDeleteConfirm={setDeleteConfirm}
-                />
+                <ChatColumn />
             </div>
 
             {fileToast && <FileToast message={fileToast} />}
 
-            {deleteConfirm && (
-                <DeleteConfirmModal
-                    deleteConfirm={deleteConfirm}
-                    selectedCount={selectedIds.length}
-                    onDismiss={() => setDeleteConfirm(null)}
-                    onConfirm={executeDeleteConfirm}
-                />
-            )}
-        </Fragment>
+            {deleteConfirm && <DeleteConfirmModal />}
+        </HomeProvider>
     );
 }

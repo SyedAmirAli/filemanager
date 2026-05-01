@@ -1,29 +1,10 @@
-import { useMemo, useState, type MutableRefObject, type RefObject } from 'react';
-import type { ChatMessage, DeleteConfirmState } from './types';
+import { useMemo, useState } from 'react';
+import type { ChatMessage } from './types';
 import { formatTime } from './utils';
+import { useHomeContext } from './HomeContext';
 
 type ChatMessageItemProps = {
     message: ChatMessage;
-    selectionMode: boolean;
-    selected: boolean;
-    isNew: boolean;
-    editing: boolean;
-    editDraft: string;
-    setEditDraft: (value: string) => void;
-    menuOpen: boolean;
-    setMenuOpenId: (value: string | null) => void;
-    chatMenuPos: { top: number; right: number } | null;
-    setChatMenuPos: (value: { top: number; right: number } | null) => void;
-    chatMenuPopoverRef: RefObject<HTMLUListElement | null>;
-    chatMenuBtnRefs: MutableRefObject<Map<string, HTMLButtonElement>>;
-    toggleSelected: (id: string) => void;
-    startEdit: (message: ChatMessage) => void;
-    cancelEdit: () => void;
-    saveEdit: () => void;
-    copyPlainText: (message: ChatMessage) => void;
-    togglePinMsg: (message: ChatMessage) => void;
-    enterSelectionForMessage: (message: ChatMessage) => void;
-    setDeleteConfirm: (value: DeleteConfirmState) => void;
 };
 
 function stripHtml(html: string): string {
@@ -97,29 +78,34 @@ function ChatMessageBody({ body }: { body: string }) {
     );
 }
 
-export function ChatMessageItem({
-    message,
-    selectionMode,
-    selected,
-    isNew,
-    editing,
-    editDraft,
-    setEditDraft,
-    menuOpen,
-    setMenuOpenId,
-    chatMenuPos,
-    setChatMenuPos,
-    chatMenuPopoverRef,
-    chatMenuBtnRefs,
-    toggleSelected,
-    startEdit,
-    cancelEdit,
-    saveEdit,
-    copyPlainText,
-    togglePinMsg,
-    enterSelectionForMessage,
-    setDeleteConfirm,
-}: ChatMessageItemProps) {
+export function ChatMessageItem({ message }: ChatMessageItemProps) {
+    const {
+        selectionMode,
+        selectedIds,
+        newIds,
+        editingId,
+        editDraft,
+        setEditDraft,
+        menuOpenId,
+        setMenuOpenId,
+        chatMenuPos,
+        setChatMenuPos,
+        chatMenuPopoverRef,
+        chatMenuBtnRefs,
+        toggleSelected,
+        startEdit,
+        cancelEdit,
+        saveEdit,
+        copyPlainText,
+        togglePinMsg,
+        enterSelectionForMessage,
+        setDeleteConfirm,
+    } = useHomeContext();
+    const selected = selectedIds.includes(message.id);
+    const isNew = newIds.has(message.id);
+    const editing = editingId === message.id;
+    const menuOpen = menuOpenId === message.id;
+
     return (
         <article
             className={`chat-msg${selectionMode ? ' chat-msg--select-mode' : ''}${isNew ? ' chat-msg--new' : ''}${message.pinned ? ' chat-msg--pinned' : ''}`}

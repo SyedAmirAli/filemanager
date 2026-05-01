@@ -1,56 +1,33 @@
 import { Download, Eye, Trash2 } from 'lucide-react';
-import type { DragEvent, FormEvent, RefObject } from 'react';
-import type { DeleteConfirmState, FileRow, UploadJob } from './types';
 import { formatBytes, formatSize, formatTime } from './utils';
 import { RawFileModal } from './RawFileModal';
+import { useHomeContext } from './HomeContext';
 
-type Props = {
-    files: FileRow[];
-    filesErr: string | null;
-    uploadBusy: boolean;
-    drag: boolean;
-    setDrag: (v: boolean) => void;
-    fileInputRef: RefObject<HTMLInputElement | null>;
-    runUploadQueue: (fileList: FileList | File[]) => void;
-    onDrop: (e: DragEvent) => void;
-    uploadJobs: UploadJob[];
-    rawFileModalOpen: boolean;
-    setRawFileModalOpen: (v: boolean) => void;
-    rawFileName: string;
-    rawFileContent: string;
-    rawFileNameInputRef: RefObject<HTMLInputElement | null>;
-    closeRawFileModal: () => void;
-    submitRawFile: (e: FormEvent) => void;
-    setRawFileName: (v: string) => void;
-    setRawFileContent: (v: string) => void;
-    openFilePreview: (f: FileRow) => void;
-    downloadFile: (f: FileRow) => void;
-    setDeleteConfirm: (v: DeleteConfirmState) => void;
-};
+export function FilesColumn() {
+    const {
+        files,
+        filesErr,
+        uploadBusy,
+        drag,
+        setDrag,
+        fileInputRef,
+        runUploadQueue,
+        onDrop,
+        uploadJobs,
+        rawFileModalOpen,
+        setRawFileModalOpen,
+        rawFileName,
+        rawFileContent,
+        rawFileNameInputRef,
+        closeRawFileModal,
+        submitRawFile,
+        setRawFileName,
+        setRawFileContent,
+        openFilePreview,
+        downloadFile,
+        setDeleteConfirm,
+    } = useHomeContext();
 
-export function FilesColumn({
-    files,
-    filesErr,
-    uploadBusy,
-    drag,
-    setDrag,
-    fileInputRef,
-    runUploadQueue,
-    onDrop,
-    uploadJobs,
-    rawFileModalOpen,
-    setRawFileModalOpen,
-    rawFileName,
-    rawFileContent,
-    rawFileNameInputRef,
-    closeRawFileModal,
-    submitRawFile,
-    setRawFileName,
-    setRawFileContent,
-    openFilePreview,
-    downloadFile,
-    setDeleteConfirm,
-}: Props) {
     return (
         <section className="layout-section layout-section--files">
             <h2>Files</h2>
